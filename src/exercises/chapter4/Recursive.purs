@@ -4,12 +4,13 @@ module Exercises.Chapter4.Recursive
     countElementsByMatch,
     isEven,
     calcSquares,
+    findFactorPairs,
     (<$?>)
   ) where
   
 import Prelude
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Array (head, tail, uncons, filter)
+import Data.Array ((..), filter, head, tail, uncons, concatMap)
 
 boolToNumber :: Boolean -> Int
 boolToNumber false = 0
@@ -53,3 +54,9 @@ infix 4 filter as <$?>
 
 removeNegatives :: Array Int -> Array Int
 removeNegatives arr = (\n -> n < 0) <$?> arr
+
+findFactorPairs :: Int -> Array (Array Int)
+findFactorPairs number = concatMap (\n -> generatePairs n) (1..number)
+  where
+    generatePairs :: Int -> Array (Array Int)
+    generatePairs current = map (\n -> [current, n]) $ filter (\n -> n * current == number) (current..number)

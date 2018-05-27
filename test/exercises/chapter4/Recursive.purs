@@ -1,14 +1,17 @@
-module Test.Exercises.Chapter4 where
+module Test.Exercises.Chapter4.Recursive where
 
 import Prelude
+
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, log)
-import Test.Assert (ASSERT, assert)
 import Exercises.Chapter4.Recursive (
   countElementsByMatch, 
   countElementsByMatchOpt, 
-  isEven,
-  (<$?>))
+  findFactorPairs, 
+  isEven, 
+  (<$?>)
+  )
+import Test.Assert (ASSERT, assert)
 
 runTests :: forall e. Eff (console :: CONSOLE, assert :: ASSERT | e) Unit
 runTests = do
@@ -29,5 +32,8 @@ runTests = do
 
   log "------------------------------------------"
   log $ show $ (\n -> n > 3 && n < 10) <$?> array
+
+  log "------------------------------------------"
+  log $ show $ findFactorPairs 168
 
   log "Done"
