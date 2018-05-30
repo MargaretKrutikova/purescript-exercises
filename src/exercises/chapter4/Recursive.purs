@@ -5,12 +5,18 @@ module Exercises.Chapter4.Recursive
     isEven,
     calcSquares,
     findFactorPairs,
-    (<$?>)
+    (<$?>),
+    isPrime,
+    findCartesianProduct,
+    triples
   ) where
   
 import Prelude
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Array ((..), filter, head, tail, uncons, concatMap)
+import Data.Array ((..), length, filter, head, tail, uncons, concatMap)
+import Control.MonadZero (guard)
+import Math (sqrt)
+import Data.Int (fromNumber, toNumber)
 
 boolToNumber :: Boolean -> Int
 boolToNumber false = 0
@@ -60,3 +66,39 @@ findFactorPairs number = concatMap (\n -> generatePairs n) (1..number)
   where
     generatePairs :: Int -> Array (Array Int)
     generatePairs current = map (\n -> [current, n]) $ filter (\n -> n * current == number) (current..number)
+
+factors :: Int -> Array (Array Int)
+factors n = do
+  i <- 1 .. n
+  j <- i .. n
+  guard $ i * j == n
+  pure [i, j]
+
+isPrime :: Int -> Boolean
+isPrime number = length (factors number) == 1
+
+findCartesianProduct :: Array Int -> Array Int -> Array (Array Int)
+findCartesianProduct a b = do
+  i <- a
+  j <- b
+  pure [i, j]
+
+triples :: Int -> Array (Array Int)
+triples number = do
+  a <- 1 .. (number / 2 + 1)
+  b <- a .. (number / 2 + 1)
+  c <- [sqrt $ toNumber (a * a + b * b)]
+  guard $ isInt c && c < toNumber number
+  pure [a, b, convertToInt c]
+
+isInt :: Number -> Boolean
+isInt number = 
+  case fromNumber number of
+    Nothing -> false
+    Just n -> true
+
+convertToInt :: Number -> Int
+convertToInt number = 
+  case fromNumber number of
+    Nothing -> 0
+    Just n -> n
