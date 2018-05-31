@@ -1,26 +1,21 @@
-module Exercises.Chapter4.Recursive 
-  (
-    countElementsByMatchOpt,
-    countElementsByMatch,
-    isEven,
-    calcSquares,
-    findFactorPairs,
-    (<$?>),
-    isPrime,
-    findCartesianProduct,
-    triples
-  ) where
+module Exercises.Chapter4.Recursive where
   
 import Prelude
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Array ((..), length, filter, head, tail, uncons, concatMap)
+import Data.Array ((..), (:), length, filter, head, tail, uncons, concatMap)
 import Control.MonadZero (guard)
 import Math (sqrt)
 import Data.Int (fromNumber, toNumber)
+import Data.Foldable (foldl)
 
 boolToNumber :: Boolean -> Int
 boolToNumber false = 0
 boolToNumber true = 1
+
+maybeBoolToNumber :: Maybe Boolean -> Int
+maybeBoolToNumber val = case val of
+  Nothing -> 0
+  Just v -> boolToNumber v
 
 countElementsRec :: forall a. (a -> Boolean) -> Array a -> Int -> Int
 countElementsRec matchFn array currentCount = 
@@ -37,7 +32,7 @@ countElementsByMatchOpt matchFn array = countElementsRec matchFn array 0
 countElementsByMatch :: forall a. (a -> Boolean) -> Array a -> Int
 countElementsByMatch _ [] = 0
 countElementsByMatch matchFn array = 
-    (addIfMatches $ head array) + countElementsByMatch matchFn (fromMaybe [] $ tail array)
+    (addIfMatches $ head array) + countElementsByMatch matchFn (tailOrEmpty array)
     where
       addIfMatches :: Maybe a -> Int
       addIfMatches element = if fromMaybe false $ map matchFn element then 1 else 0
@@ -102,3 +97,35 @@ convertToInt number =
   case fromNumber number of
     Nothing -> 0
     Just n -> n
+
+areAllTrue :: Array Boolean -> Boolean
+areAllTrue array = foldl (==) true array
+
+-- this function returns true for arrays that:
+-- has uneven number of elements equal to false
+isWeirdBooleanArray :: Array Boolean -> Boolean
+isWeirdBooleanArray array = foldl (==) false array
+
+-- count :: forall a. (a -> Boolean) -> Array a -> Int 
+-- count _ [] = 0 
+-- count p xs = 
+--   if p (unsafePartial head xs) 
+--     then count p (unsafePartial tail xs) + 1 
+--     else count p (unsafePartial tail xs)
+
+countTailRecursive :: forall a. (a -> Boolean) -> Array a -> Int 
+countTailRecursive _ [] = 0
+countTailRecursive matchFn array = countRec array 0
+  where
+    countRec :: Array a -> Int -> Int
+    countRec [] finalCount = finalCount
+    countRec array currentCount = countRec (tailOrEmpty array) (updateCount currentCount)
+        where
+          updateCount :: Int -> Int
+          updateCount = (+) $ maybeBoolToNumber $ map matchFn (head array)
+
+tailOrEmpty :: forall a. Array a -> Array a
+tailOrEmpty = fromMaybe [] <<< tail
+
+reverseFoldl :: forall a. Array a -> Array a
+reverseFoldl = foldl (\acc x -> x : acc) []
